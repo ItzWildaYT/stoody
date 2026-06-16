@@ -3,37 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StudyOS Boot</title>
+<title>StudyOS 11</title>
 
 <style>
-body { margin:0; font-family:Arial,sans-serif; overflow:hidden; background:#000; color:#e2e8f0; }
+body { margin:0; font-family:Segoe UI, Arial; overflow:hidden; background:#0b1220; color:#e5e7eb; }
 
 .boot { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; align-items:center; }
-.logo { font-size:2rem; font-weight:800; color:#38bdf8; }
-.loading { margin-top:20px; width:200px; height:4px; background:#1e293b; border-radius:999px; overflow:hidden; }
-.bar { width:0%; height:100%; background:#38bdf8; }
+.bootTitle { font-size:2rem; font-weight:700; color:#38bdf8; }
+.bootBar { width:220px; height:4px; background:#1f2937; margin-top:20px; border-radius:999px; overflow:hidden; }
+.bootFill { width:0%; height:100%; background:#38bdf8; }
 
-.desktop { display:none; width:100vw; height:100vh; background:radial-gradient(circle,#1e293b,#0f172a); position:relative; }
+.desktop { display:none; width:100vw; height:100vh; background:radial-gradient(circle at top,#1e293b,#0f172a); position:relative; }
 
-.taskbar { position:absolute; bottom:0; left:0; right:0; height:45px; background:rgba(0,0,0,0.6); display:flex; align-items:center; padding:0 10px; }
-.start { background:#38bdf8; color:#0f172a; padding:6px 10px; border-radius:6px; font-weight:bold; cursor:pointer; }
-.clock { margin-left:auto; font-size:0.9rem; opacity:0.8; }
+.taskbar { position:absolute; bottom:0; left:0; right:0; height:55px; background:rgba(0,0,0,0.65); display:flex; align-items:center; padding:0 10px; backdrop-filter:blur(10px); }
 
-.window { position:absolute; top:80px; left:80px; width:400px; background:rgba(255,255,255,0.06); backdrop-filter:blur(10px); border-radius:12px; box-shadow:0 0 25px rgba(0,0,0,0.6); }
-.title { padding:10px; background:rgba(0,0,0,0.4); border-radius:12px 12px 0 0; font-weight:bold; }
+.startBtn { width:38px; height:38px; background:url("assets/windows.png") center/cover; cursor:pointer; }
+
+.taskIcons { display:flex; gap:10px; margin-left:20px; }
+
+.taskIcon { width:32px; height:32px; border-radius:6px; cursor:pointer; }
+
+.clock { margin-left:auto; font-size:0.85rem; opacity:0.85; }
+
+.startMenu { position:absolute; bottom:65px; left:10px; width:260px; background:rgba(15,23,42,0.95); border-radius:12px; padding:10px; display:none; }
+
+.menuItem { padding:10px; border-radius:8px; cursor:pointer; }
+.menuItem:hover { background:rgba(255,255,255,0.08); }
+
+.iconGrid { position:absolute; top:20px; left:20px; display:flex; flex-direction:column; gap:20px; }
+
+.desktopIcon { width:70px; text-align:center; cursor:pointer; font-size:0.75rem; }
+
+.desktopIcon img { width:48px; height:48px; display:block; margin:0 auto 5px; }
+
+.window { position:absolute; width:520px; background:rgba(255,255,255,0.06); backdrop-filter:blur(14px); border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,0.7); display:none; }
+
+.titleBar { padding:10px; background:rgba(0,0,0,0.5); display:flex; justify-content:space-between; border-radius:12px 12px 0 0; }
+
 .content { padding:15px; }
 
 .big { font-size:1.2rem; font-weight:800; color:#38bdf8; margin-bottom:10px; }
-.timer { font-size:1.8rem; font-weight:900; margin:10px 0; }
-.exam { opacity:0.9; margin-bottom:5px; }
 
-.badge { display:inline-block; margin-top:10px; padding:5px 10px; border-radius:999px; background:#38bdf8; color:#0f172a; font-weight:bold; }
+.timer { font-size:2rem; font-weight:900; margin:10px 0; }
 
-.warn { color:#fbbf24; font-weight:bold; }
-.danger { color:#ef4444; font-weight:bold; }
+.badge { display:inline-block; padding:5px 10px; background:#38bdf8; color:#0f172a; border-radius:999px; font-weight:700; }
 
-.barwrap { width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:999px; overflow:hidden; margin-top:10px; }
+.warn { color:#fbbf24; font-weight:700; }
+
+.danger { color:#ef4444; font-weight:700; }
+
+.bar { width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:999px; overflow:hidden; margin-top:10px; }
+
 .fill { height:100%; width:0%; background:#38bdf8; }
+
+.appFrame { width:100%; height:300px; border:none; background:#0f172a; border-radius:10px; margin-top:10px; }
+
+.closeBtn { cursor:pointer; }
 </style>
 
 </head>
@@ -41,53 +66,101 @@ body { margin:0; font-family:Arial,sans-serif; overflow:hidden; background:#000;
 <body>
 
 <div class="boot" id="boot">
-  <div class="logo">StudyOS</div>
-  <div class="loading"><div class="bar" id="loadBar"></div></div>
+  <div class="bootTitle">StudyOS 11</div>
+  <div class="bootBar"><div class="bootFill" id="bootFill"></div></div>
 </div>
 
 <div class="desktop" id="desktop">
 
-  <div class="window">
-    <div class="title">Stoodying</div>
+  <div class="iconGrid">
+    <div class="desktopIcon" onclick="openApp('study')">
+      <img src="assets/study.png">
+      Study Panel
+    </div>
 
+    <div class="desktopIcon" onclick="openApp('youtube')">
+      <img src="assets/youtube.png">
+      YouTube
+    </div>
+
+    <div class="desktopIcon" onclick="openApp('discord')">
+      <img src="assets/discord.png">
+      Discord
+    </div>
+  </div>
+
+  <div class="window" id="studyWin">
+    <div class="titleBar">
+      <span>Study Control Panel</span>
+      <span class="closeBtn" onclick="closeApp('study')">✖</span>
+    </div>
     <div class="content">
-      <div class="big">I KNEW YOU WERE GAY! NOW LET ME STUDY.</div>
-
-      <div class="exam" id="examName">Loading exam...</div>
-      <div class="timer" id="timer">--</div>
-
+      <div class="big">NOW LET ME STUDY.</div>
+      <div id="examName">Loading...</div>
+      <div class="timer" id="timer"></div>
       <div id="alert"></div>
-
-      <div class="barwrap"><div class="fill" id="fill"></div></div>
-
+      <div class="bar"><div class="fill" id="fill"></div></div>
       <div class="badge">FOCUS MODE ACTIVE</div>
     </div>
   </div>
 
+  <div class="window" id="youtubeWin">
+    <div class="titleBar">
+      <span>YouTube</span>
+      <span class="closeBtn" onclick="closeApp('youtube')">✖</span>
+    </div>
+    <div class="content">
+      <iframe class="appFrame" src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe>
+    </div>
+  </div>
+
+  <div class="window" id="discordWin">
+    <div class="titleBar">
+      <span>Discord</span>
+      <span class="closeBtn" onclick="closeApp('discord')">✖</span>
+    </div>
+    <div class="content">
+      <div class="big">Discord is currently blocked.</div>
+      <div class="badge">STUDY OS FIREWALL</div>
+    </div>
+  </div>
+
   <div class="taskbar">
-    <div class="start">Start</div>
+    <div class="startBtn" onclick="toggleStart()"></div>
+
+    <div class="taskIcons">
+      <img class="taskIcon" src="assets/study.png" onclick="openApp('study')">
+      <img class="taskIcon" src="assets/youtube.png" onclick="openApp('youtube')">
+      <img class="taskIcon" src="assets/discord.png" onclick="openApp('discord')">
+    </div>
+
     <div class="clock" id="clock"></div>
+  </div>
+
+  <div class="startMenu" id="startMenu">
+    <div class="menuItem" onclick="openApp('study')">📊 Study Panel</div>
+    <div class="menuItem" onclick="openApp('youtube')">▶ YouTube</div>
+    <div class="menuItem" onclick="openApp('discord')">💬 Discord</div>
   </div>
 
 </div>
 
 <script>
 
-let load = 0;
-const bootInterval = setInterval(() => {
-  load += 2;
-  document.getElementById("loadBar").style.width = load + "%";
-  if(load >= 100){
-    clearInterval(bootInterval);
+let boot = 0;
+setInterval(() => {
+  boot += 2;
+  document.getElementById("bootFill").style.width = boot + "%";
+  if(boot >= 100){
     document.getElementById("boot").style.display = "none";
     document.getElementById("desktop").style.display = "block";
   }
-}, 30);
+}, 25);
 
 const exams = [
-  { name:"Exam 1", time:new Date("2026-06-16T11:30:00") },
-  { name:"Exam 2", time:new Date("2026-06-17T08:15:00") },
-  { name:"Exam 3", time:new Date("2026-06-19T08:15:00") }
+  {name:"Exam 1", time:new Date("2026-06-16T11:30:00")},
+  {name:"Exam 2", time:new Date("2026-06-17T08:15:00")},
+  {name:"Exam 3", time:new Date("2026-06-19T08:15:00")}
 ];
 
 function nextExam(){
@@ -104,36 +177,38 @@ function format(ms){
 }
 
 function update(){
-
   const exam = nextExam();
   const now = new Date();
 
-  if(!exam){
-    document.getElementById("examName").innerText = "All exams completed 🎉";
-    document.getElementById("timer").innerText = "0d 0h 0m 0s";
-    return;
+  if(exam){
+    const diff = exam.time - now;
+    document.getElementById("examName").innerText = exam.name + " → NEXT";
+    document.getElementById("timer").innerText = format(diff);
+
+    let alert = "";
+    if(diff < 3600000) alert = "<div class='danger'>CRITICAL</div>";
+    else if(diff < 86400000) alert = "<div class='warn'>WARNING</div>";
+    document.getElementById("alert").innerHTML = alert;
+
+    let total = 1000*60*60*24*10;
+    let prog = Math.max(0, Math.min(100, 100 - (diff/total)*100));
+    document.getElementById("fill").style.width = prog + "%";
   }
-
-  const diff = exam.time - now;
-
-  document.getElementById("examName").innerText = exam.name + " → NEXT";
-  document.getElementById("timer").innerText = format(diff);
-
-  let alert = "";
-
-  if(diff < 3600000){
-    alert = "<div class='danger'>CRITICAL: Less than 1 hour left</div>";
-  } else if(diff < 86400000){
-    alert = "<div class='warn'>WARNING: Less than 24 hours left</div>";
-  }
-
-  document.getElementById("alert").innerHTML = alert;
-
-  const totalWindow = 1000*60*60*24*10;
-  const progress = Math.max(0, Math.min(100, 100 - (diff/totalWindow)*100));
-  document.getElementById("fill").style.width = progress + "%";
 
   document.getElementById("clock").innerText = new Date().toLocaleTimeString();
+}
+
+function openApp(app){
+  document.getElementById(app+"Win").style.display = "block";
+}
+
+function closeApp(app){
+  document.getElementById(app+"Win").style.display = "none";
+}
+
+function toggleStart(){
+  const m = document.getElementById("startMenu");
+  m.style.display = m.style.display === "block" ? "none" : "block";
 }
 
 setInterval(update,1000);
