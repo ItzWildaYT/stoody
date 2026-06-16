@@ -5,101 +5,876 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyOS 11</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#000;color:#fff;overflow:hidden}
-.screen{position:fixed;inset:0}
-#boot{display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000}
-.logo{font-size:48px;font-weight:700}
-.spinner{width:42px;height:42px;border:4px solid #333;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;margin-top:24px}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#0078d4;--glass:rgba(18,20,32,0.88);--border:rgba(255,255,255,0.1)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#fff;overflow:hidden;width:100vw;height:100vh;user-select:none}
+.screen{position:fixed;inset:0;display:none}
+.screen.active{display:flex}
+
+#boot{flex-direction:column;align-items:center;justify-content:center;background:#000}
+.b-logo{opacity:0;animation:bup 1s ease 0.4s forwards;display:flex;flex-direction:column;align-items:center;gap:14px}
+.b-logo svg{width:80px;height:80px}
+.b-name{font-size:14px;font-weight:300;letter-spacing:5px;color:#bbb}
+.b-ring{width:32px;height:32px;border:3px solid #222;border-top-color:#0078d4;border-radius:50%;animation:spin 0.8s linear infinite;opacity:0;margin-top:48px;animation:spin 0.8s linear infinite, bup 0.5s ease 1.6s forwards}
 @keyframes spin{to{transform:rotate(360deg)}}
-#login{display:none;background:linear-gradient(135deg,#0f172a,#1e293b);justify-content:center;align-items:center;flex-direction:column}
-.card{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);padding:30px;border-radius:20px;width:340px;text-align:center}
-input{width:100%;padding:12px;border-radius:10px;border:none;margin-top:12px}
-button{width:100%;padding:12px;border:none;border-radius:10px;margin-top:12px;cursor:pointer}
-#error{color:#ff6b6b;height:20px}
-#desktop{display:none;background:linear-gradient(135deg,#0b1220,#172554)}
-.taskbar{position:absolute;bottom:0;left:0;right:0;height:58px;background:rgba(20,20,20,.75);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;gap:16px}
-.icon{width:42px;height:42px;background:#ffffff22;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.window{position:absolute;top:60px;left:80px;width:85vw;height:78vh;background:#111827;border-radius:18px;display:none;overflow:hidden;border:1px solid #ffffff22}
-.titlebar{height:48px;background:#1f2937;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-iframe{width:100%;height:calc(100% - 48px);border:none}
-.content{padding:20px}
-.timer{font-size:32px;font-weight:700}
+@keyframes bup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+#login{flex-direction:column;align-items:center;justify-content:space-between;padding:0;background:#000;overflow:hidden}
+.lbg{position:absolute;inset:0;background:radial-gradient(ellipse 100% 80% at 50% 100%,#050d28 0%,#000 60%)}
+.laur{position:absolute;inset:0;background:radial-gradient(ellipse 70% 40% at 15% 85%,rgba(0,80,200,0.2) 0%,transparent 55%),radial-gradient(ellipse 50% 35% at 85% 75%,rgba(80,0,180,0.15) 0%,transparent 55%),radial-gradient(ellipse 40% 30% at 50% 95%,rgba(0,100,150,0.12) 0%,transparent 60%)}
+.lstars{position:absolute;inset:0}
+.lmain{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:0}
+.ltime{font-size:108px;font-weight:100;letter-spacing:2px;line-height:1;text-shadow:0 0 80px rgba(0,100,255,0.3)}
+.ldate{font-size:17px;font-weight:300;color:rgba(255,255,255,0.65);margin-top:8px;letter-spacing:.5px}
+.lpanel{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding-bottom:72px;gap:0}
+.lavring{width:90px;height:90px;border-radius:50%;padding:2.5px;background:conic-gradient(#0078d4,#6264a7,#8b5cf6,#0078d4);margin-bottom:16px}
+.lavinner{width:100%;height:100%;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;font-size:34px}
+.lname{font-size:20px;font-weight:300;margin-bottom:3px}
+.lsub{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:22px}
+.lpin-row{display:flex;align-items:center;gap:8px}
+.lpin-box{display:flex;align-items:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:6px;height:42px;padding:0 14px;gap:10px;width:220px;transition:border-color .2s}
+.lpin-box:focus-within{border-color:#0078d4;box-shadow:0 0 0 1px rgba(0,120,212,0.5)}
+.lpin-box input{background:transparent;border:none;outline:none;color:#fff;font-size:20px;letter-spacing:8px;width:100%;font-family:inherit}
+.lpin-box input::placeholder{font-size:12px;letter-spacing:1px;color:rgba(255,255,255,0.3)}
+.lpin-go{width:42px;height:42px;background:#0078d4;border:none;border-radius:6px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.lpin-go:hover{background:#1084d8}
+.lpin-go svg{width:18px;height:18px}
+.lerr{font-size:12px;color:#ff7070;height:16px;margin-top:8px;text-align:center}
+.lbottom{position:relative;z-index:2;width:100%;height:50px;display:flex;align-items:center;justify-content:flex-end;padding:0 20px;gap:6px}
+.lbottom-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:rgba(255,255,255,0.6);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.lbottom-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+.lbottom-btn svg{width:18px;height:18px}
+
+#desktop{overflow:hidden;flex-direction:column}
+#wpcanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.desk-area{position:absolute;inset:0 0 48px 0;z-index:1}
+
+.dicons{position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:4px;z-index:5}
+.dic{width:78px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 6px;border-radius:7px;cursor:pointer;transition:background .12s}
+.dic:hover{background:rgba(255,255,255,0.1)}
+.dic.sel{background:rgba(0,120,212,0.3);outline:1px solid rgba(0,120,212,0.55)}
+.dic svg{width:38px;height:38px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.6))}
+.dic-lbl{font-size:10.5px;text-align:center;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,0.9);line-height:1.25;word-break:break-word}
+
+.taskbar{position:absolute;bottom:0;left:0;right:0;height:48px;background:rgba(16,18,28,0.9);backdrop-filter:blur(40px) saturate(1.8);border-top:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;z-index:100}
+.tb-start{width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;flex-shrink:0}
+.tb-start:hover{background:rgba(255,255,255,0.08)}
+.tb-mid{flex:1;display:flex;align-items:center;justify-content:center;gap:1px}
+.tbi{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;position:relative;transition:background .15s;flex-shrink:0}
+.tbi:hover{background:rgba(255,255,255,0.1)}
+.tbi svg{width:22px;height:22px}
+.tbi-dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#fff;display:none}
+.tbi.on .tbi-dot{display:block}
+.tb-search{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);border-radius:7px;padding:0 10px;height:30px;margin-left:6px;cursor:text;width:160px;transition:background .15s;flex-shrink:0}
+.tb-search:hover{background:rgba(255,255,255,0.1)}
+.tb-search svg{width:13px;height:13px;opacity:0.45}
+.tb-search span{font-size:11.5px;color:rgba(255,255,255,0.4)}
+.tb-right{display:flex;align-items:center;padding-right:6px}
+.tb-sys-icons{display:flex;gap:1px;align-items:center;padding:3px 6px;border-radius:5px;cursor:pointer;transition:background .15s}
+.tb-sys-icons:hover{background:rgba(255,255,255,0.07)}
+.tb-clock{font-size:11px;text-align:right;line-height:1.5;color:#ddd;padding:4px 8px;border-radius:5px;cursor:pointer;white-space:nowrap;transition:background .15s}
+.tb-clock:hover{background:rgba(255,255,255,0.07)}
+
+.win{position:absolute;display:none;flex-direction:column;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.11);box-shadow:0 20px 60px rgba(0,0,0,0.75),0 0 0 0.5px rgba(255,255,255,0.04)}
+.win.on{display:flex}
+.wbar{height:34px;background:rgba(20,22,34,0.97);display:flex;align-items:center;padding:0 8px;flex-shrink:0;cursor:move;gap:6px}
+.wbar-ico{width:14px;height:14px;flex-shrink:0}
+.wbar-title{font-size:12px;color:#bbb;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;padding-left:2px}
+.wctrl{display:flex}
+.wb{width:44px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:rgba(255,255,255,0.65);cursor:pointer;transition:background .12s;flex-shrink:0}
+.wb:hover{background:rgba(255,255,255,0.09)}
+.wb.wclose:hover{background:#c42b1c;color:#fff}
+.wb svg{width:11px;height:11px}
+.wbody{flex:1;overflow:hidden;background:#0d0f1a;position:relative}
+.wbody iframe{width:100%;height:100%;border:none;display:block}
+
+.study-scroll{height:100%;overflow-y:auto;background:#080c18;padding:22px;scrollbar-width:thin;scrollbar-color:#1a2a50 transparent}
+.sh{font-size:10px;color:#3a70c0;letter-spacing:3px;text-transform:uppercase;margin-bottom:3px}
+.st{font-size:24px;font-weight:200;margin-bottom:20px;color:#ddeeff}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.sgc{background:rgba(0,100,200,0.1);border:1px solid rgba(0,100,200,0.18);border-radius:10px;padding:12px;text-align:center}
+.sgc-n{font-size:28px;font-weight:200;color:#5090ff}
+.sgc-l{font-size:9px;color:#3a70a0;letter-spacing:1px;margin-top:2px}
+.scard{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:18px;margin-bottom:12px}
+.scard-l{font-size:9px;color:#3a70b0;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.scard-n{font-size:15px;font-weight:300;color:#b0d0ff;margin-bottom:10px}
+.scd{font-size:36px;font-weight:200;color:#fff;letter-spacing:2px;font-variant-numeric:tabular-nums}
+.scd span{font-size:10px;color:#3a70b0;vertical-align:super;margin-right:1px}
+.sexh{font-size:9px;color:#3a70b0;letter-spacing:2px;margin:14px 0 6px}
+.sexi{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.sexd{width:7px;height:7px;border-radius:50%;background:#0d1f40;border:1px solid #1a3a7a;flex-shrink:0}
+.sexd.nxt{background:#0078d4;border-color:#0078d4;box-shadow:0 0 7px #0078d466}
+.sexd.dn{background:#0a7a0a;border-color:#0a7a0a}
+.sexn{flex:1;color:#7090c0}
+.sext{color:#3a6090;font-size:10px}
+.squote{background:rgba(80,60,160,0.12);border-left:3px solid #5050a0;border-radius:0 9px 9px 0;padding:11px 14px;font-size:12px;color:#8090c0;font-style:italic;line-height:1.65;margin-top:12px}
+.stasks{margin-top:14px}
+.stask-h{font-size:9px;color:#3a70b0;letter-spacing:2px;margin-bottom:8px}
+.stask-i{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,0.03);border-radius:7px;margin-bottom:5px;font-size:12px;color:#7090b0;cursor:pointer;transition:background .12s}
+.stask-i:hover{background:rgba(255,255,255,0.06)}
+.stask-i.dn{text-decoration:line-through;opacity:0.35}
+.stask-cb{width:13px;height:13px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#0a7a0a}
+.stask-i.dn .stask-cb{background:#0a7a0a;border-color:#0a7a0a}
+
+.pomo-wrap{height:100%;display:flex;flex-direction:column;align-items:center;background:#070a14;padding:18px;overflow:hidden}
+.ptabs{display:flex;gap:3px;background:rgba(255,255,255,0.04);border-radius:7px;padding:3px;margin-bottom:20px;width:100%}
+.ptab{flex:1;padding:6px;border-radius:5px;border:none;background:transparent;color:#666;font-size:12px;cursor:pointer;transition:all .15s}
+.ptab.on{background:rgba(255,255,255,0.1);color:#fff}
+.pring{position:relative;width:170px;height:170px;flex-shrink:0}
+.pring svg{transform:rotate(-90deg)}
+.pring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pring-t{font-size:36px;font-weight:200;letter-spacing:2px}
+.pring-l{font-size:9px;color:#3a70b0;letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.pbtns{display:flex;gap:9px;margin-top:18px}
+.pbtn{border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.pbtn:hover{background:rgba(255,255,255,0.12)}
+.pbtn.pmain{width:54px;height:54px;font-size:20px;background:rgba(0,120,212,0.2);border-color:#0078d4}
+.pbtn.psm{width:40px;height:40px}
+.ppips{display:flex;gap:7px;margin-top:14px}
+.ppip{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.ppip.dn{background:#0078d4}
+.ptask-s{margin-top:14px;width:100%;overflow-y:auto;max-height:140px;scrollbar-width:thin;scrollbar-color:#1a2a50 transparent}
+
+.browser-wrap{height:100%;display:flex;flex-direction:column;background:#0a0c16}
+.brow-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#111422;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+.brow-nav{display:flex;gap:2px}
+.brow-nbtn{width:28px;height:28px;border-radius:5px;border:none;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.brow-nbtn:hover{background:rgba(255,255,255,0.08);color:#fff}
+.brow-nbtn svg{width:14px;height:14px}
+.brow-url{flex:1;display:flex;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:0 12px;height:30px;gap:6px;transition:border-color .2s}
+.brow-url:focus-within{border-color:#0078d4;background:rgba(255,255,255,0.09)}
+.brow-url svg{width:12px;height:12px;opacity:0.4;flex-shrink:0}
+.brow-url input{background:transparent;border:none;outline:none;color:#ddd;font-size:12px;width:100%;font-family:inherit}
+.brow-tabs{display:flex;gap:2px;padding:4px 10px 0;background:#0c0e1a;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.brow-tabs::-webkit-scrollbar{display:none}
+.btab{display:flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(255,255,255,0.04);border-radius:6px 6px 0 0;cursor:pointer;font-size:11px;color:#888;border:1px solid transparent;border-bottom:none;max-width:160px;min-width:80px;transition:background .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.btab:hover{background:rgba(255,255,255,0.08)}
+.btab.active-tab{background:#0a0c16;border-color:rgba(255,255,255,0.1);color:#ddd}
+.btab-ico{width:12px;height:12px;flex-shrink:0}
+.btab-close{margin-left:auto;width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;opacity:0.5;flex-shrink:0;transition:opacity .12s,background .12s}
+.btab-close:hover{opacity:1;background:rgba(255,255,255,0.15)}
+.btab-new{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:5px;cursor:pointer;color:#666;transition:background .12s,color .12s;flex-shrink:0}
+.btab-new:hover{background:rgba(255,255,255,0.08);color:#fff}
+.brow-content{flex:1;position:relative;overflow:hidden}
+.brow-frame{position:absolute;inset:0;border:none;width:100%;height:100%;background:#fff}
+.brow-newtab{position:absolute;inset:0;background:#0a0c18;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.bnt-search{display:flex;align-items:center;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:0 18px;height:44px;gap:10px;width:480px;margin-bottom:28px}
+.bnt-search input{background:transparent;border:none;outline:none;color:#ddd;font-size:14px;width:100%;font-family:inherit}
+.bnt-search input::placeholder{color:rgba(255,255,255,0.3)}
+.bnt-search svg{width:16px;height:16px;opacity:0.4;flex-shrink:0}
+.bnt-time{font-size:64px;font-weight:100;letter-spacing:2px;margin-bottom:6px;color:#fff}
+.bnt-date{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:32px}
+.bnt-shortcuts{display:grid;grid-template-columns:repeat(5,80px);gap:12px}
+.bnt-sc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:9px;cursor:pointer;transition:background .12s}
+.bnt-sc:hover{background:rgba(255,255,255,0.07)}
+.bnt-sc-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.bnt-sc-lbl{font-size:11px;color:#6080a0}
+.brow-loading{position:absolute;top:0;left:0;right:0;height:2px;background:#0078d4;z-index:10;transform:scaleX(0);transform-origin:left;transition:transform .3s}
+
+.start-menu{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);width:620px;max-height:78vh;background:rgba(14,16,26,0.96);backdrop-filter:blur(50px) saturate(2);border:1px solid rgba(255,255,255,0.09);border-radius:12px;z-index:200;display:none;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.85),0 0 0 0.5px rgba(255,255,255,0.04)}
+.start-menu.on{display:flex}
+.sm-srch{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:8px}
+.sm-sbox{flex:1;display:flex;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;gap:8px}
+.sm-sbox input{background:transparent;border:none;outline:none;color:#fff;font-size:13px;width:100%;font-family:inherit}
+.sm-sbox svg{width:15px;height:15px;opacity:0.4}
+.sm-sec{padding:14px 18px}
+.sm-sec-h{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.sm-pins{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.sm-pin{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;border-radius:7px;cursor:pointer;transition:background .12s}
+.sm-pin:hover{background:rgba(255,255,255,0.07)}
+.sm-pin svg{width:30px;height:30px}
+.sm-pin span{font-size:10.5px;color:#bbb;text-align:center}
+.sm-bot{padding:10px 18px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+.sm-user{display:flex;align-items:center;gap:9px;cursor:pointer;padding:5px 7px;border-radius:6px;transition:background .12s}
+.sm-user:hover{background:rgba(255,255,255,0.07)}
+.sm-uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0078d4,#6264a7);display:flex;align-items:center;justify-content:center;font-size:13px}
+.sm-uname{font-size:12px;color:#ccc}
+.sm-pwr-row{display:flex;gap:3px}
+.sm-pwrbtn{width:32px;height:32px;border-radius:6px;background:transparent;border:none;color:rgba(255,255,255,0.55);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.sm-pwrbtn:hover{background:rgba(255,255,255,0.09);color:#fff}
+.sm-pwrbtn svg{width:16px;height:16px}
+
+.notif-panel{position:absolute;bottom:50px;right:0;width:340px;top:0;background:rgba(12,14,22,0.96);backdrop-filter:blur(40px);border-left:1px solid rgba(255,255,255,0.07);z-index:200;display:none;flex-direction:column}
+.notif-panel.on{display:flex}
+.np-h{padding:14px 16px;font-size:13px;color:#bbb;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center}
+.np-clr{font-size:11px;color:#0078d4;cursor:pointer}
+.np-body{flex:1;overflow-y:auto;padding:10px;scrollbar-width:thin;scrollbar-color:#1a2a50 transparent}
+.ncard{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:11px 13px;margin-bottom:7px}
+.ncard-app{font-size:9px;color:#3a70b0;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.ncard-msg{font-size:12px;color:#b0c0d8;line-height:1.5}
+.ncard-t{font-size:10px;color:#3a5070;margin-top:3px}
+.np-widgets{padding:10px;border-top:1px solid rgba(255,255,255,0.06)}
+.npwh{font-size:9px;color:#3a70b0;letter-spacing:2px;margin-bottom:8px}
+.ww{background:linear-gradient(135deg,rgba(0,80,180,0.18),rgba(0,40,100,0.12));border:1px solid rgba(0,80,200,0.2);border-radius:9px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ww-t{font-size:28px;font-weight:200}
+.ww-i{font-size:11px;color:#5a90c0;margin-top:2px}
+.ww-e{font-size:32px}
+.cal{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:12px}
+.cal-m{font-size:10px;color:#4a70a0;letter-spacing:1.5px;margin-bottom:8px}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.cal-dh{font-size:8.5px;color:#3a5070}
+.cal-d{font-size:10.5px;color:#607090;padding:3px 0;border-radius:50%;cursor:pointer;transition:background .12s;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin:auto}
+.cal-d:hover{background:rgba(255,255,255,0.07)}
+.cal-d.today{background:#0078d4;color:#fff}
+.cal-d.om{opacity:0.25}
 </style>
 </head>
 <body>
-<div id="boot" class="screen">
-<div class="logo">StudyOS 11</div>
-<div class="spinner"></div>
+<div id="boot" class="screen active">
+  <div class="b-logo">
+    <svg viewBox="0 0 80 80" fill="none">
+      <rect x="4" y="4" width="34" height="34" rx="5" fill="#0078d4"/>
+      <rect x="42" y="4" width="34" height="34" rx="5" fill="#0078d4" opacity="0.75"/>
+      <rect x="4" y="42" width="34" height="34" rx="5" fill="#0078d4" opacity="0.75"/>
+      <rect x="42" y="42" width="34" height="34" rx="5" fill="#0078d4" opacity="0.55"/>
+    </svg>
+    <div class="b-name">StudyOS 11</div>
+  </div>
+  <div class="b-ring"></div>
 </div>
 
 <div id="login" class="screen">
-<div class="card">
-<h2>Welcome</h2>
-<p>Password required</p>
-<input id="pw" type="password" placeholder="Enter password">
-<button onclick="doLogin()">Sign In</button>
-<div id="error"></div>
-</div>
+  <div class="lbg"></div><div class="laur"></div>
+  <canvas class="lstars" id="lstars"></canvas>
+  <div class="lmain">
+    <div class="ltime" id="ltime">00:00</div>
+    <div class="ldate" id="ldate"></div>
+  </div>
+  <div class="lpanel">
+    <div class="lavring"><div class="lavinner">🎓</div></div>
+    <div class="lname">Student</div>
+    <div class="lsub">Local Account · StudyOS 11</div>
+    <div class="lpin-row">
+      <div class="lpin-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="pinIn" placeholder="PIN" maxlength="4" inputmode="numeric" autocomplete="off">
+      </div>
+      <button class="lpin-go" onclick="doLogin()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="lerr" id="lerr"></div>
+  </div>
+  <div class="lbottom">
+    <button class="lbottom-btn" title="Network"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg></button>
+    <button class="lbottom-btn" title="Power" onclick="shutdown()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v10M6.3 5.7a8 8 0 1 0 11.4 0"/></svg></button>
+  </div>
 </div>
 
 <div id="desktop" class="screen">
-<div id="study" class="window">
-<div class="titlebar"><span>Study Dashboard</span><span onclick="closeWin('study')" style="cursor:pointer">✕</span></div>
-<div class="content">
-<h1>NOW LET ME STUDY.</h1>
-<div id="exam"></div>
-<div id="count" class="timer"></div>
-</div>
-</div>
+  <canvas id="wpcanvas"></canvas>
+  <div class="desk-area" id="deskArea">
+    <div class="dicons" id="dicons"></div>
+  </div>
 
-<div id="youtube" class="window">
-<div class="titlebar"><span>YouTube</span><span onclick="closeWin('youtube')" style="cursor:pointer">✕</span></div>
-<iframe src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
-</div>
+  <div id="winStudy" class="win" style="top:55px;left:65px;width:500px;height:610px">
+    <div class="wbar" onmousedown="dragWin(event,'winStudy')">
+      <svg class="wbar-ico" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="1.5" stroke="#5090ee" stroke-width="1.2" fill="none"/><path d="M4 5h6M4 8h4" stroke="#5090ee" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <div class="wbar-title">Study Dashboard</div>
+      <div class="wctrl">
+        <button class="wb" onclick="minW('winStudy','ti-study')"><svg viewBox="0 0 11 11" fill="currentColor"><rect x="0" y="4.5" width="11" height="2" rx="1"/></svg></button>
+        <button class="wb" onclick="maxW('winStudy')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="9" height="9" rx="1"/></svg></button>
+        <button class="wb wclose" onclick="closeW('winStudy','ti-study')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l9 9M10 1L1 10"/></svg></button>
+      </div>
+    </div>
+    <div class="wbody">
+      <div class="study-scroll">
+        <div class="sh">StudyOS</div>
+        <div class="st">Lock in. Focus. Win. 🔥</div>
+        <div class="sgrid">
+          <div class="sgc"><div class="sgc-n" id="sDays">--</div><div class="sgc-l">Days Left</div></div>
+          <div class="sgc"><div class="sgc-n" id="sExams">3</div><div class="sgc-l">Exams Left</div></div>
+          <div class="sgc"><div class="sgc-n" id="sHours">--</div><div class="sgc-l">Hours Left</div></div>
+        </div>
+        <div class="scard">
+          <div class="scard-l">Next Exam</div>
+          <div class="scard-n" id="sName">—</div>
+          <div class="scd" id="sCD">--</div>
+        </div>
+        <div class="sexh">All Exams</div>
+        <div id="sExList"></div>
+        <div class="squote" id="sQuote"></div>
+        <div class="stasks">
+          <div class="stask-h">Today's Tasks</div>
+          <div id="sTaskList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div id="discord" class="window">
-<div class="titlebar"><span>Discord</span><span onclick="closeWin('discord')" style="cursor:pointer">✕</span></div>
-<iframe src="https://discord.com/app"></iframe>
-</div>
+  <div id="winPomo" class="win" style="top:55px;left:580px;width:340px;height:500px">
+    <div class="wbar" onmousedown="dragWin(event,'winPomo')">
+      <svg class="wbar-ico" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="8" r="5" stroke="#ff5555" stroke-width="1.2"/><path d="M7 5.5V8l2 1.5" stroke="#ff5555" stroke-width="1.2" stroke-linecap="round"/><path d="M5 3c0-.7.9-1 2-1s2 .3 2 1" stroke="#4a8a3a" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <div class="wbar-title">Pomodoro Timer</div>
+      <div class="wctrl">
+        <button class="wb" onclick="minW('winPomo','ti-pomo')"><svg viewBox="0 0 11 11" fill="currentColor"><rect x="0" y="4.5" width="11" height="2" rx="1"/></svg></button>
+        <button class="wb" onclick="maxW('winPomo')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="9" height="9" rx="1"/></svg></button>
+        <button class="wb wclose" onclick="closeW('winPomo','ti-pomo')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l9 9M10 1L1 10"/></svg></button>
+      </div>
+    </div>
+    <div class="wbody">
+      <div class="pomo-wrap">
+        <div class="ptabs">
+          <button class="ptab on" id="pt-focus" onclick="setPomoMode('focus')">Focus</button>
+          <button class="ptab" id="pt-short" onclick="setPomoMode('short')">Short</button>
+          <button class="ptab" id="pt-long" onclick="setPomoMode('long')">Long</button>
+        </div>
+        <div class="pring">
+          <svg width="170" height="170" viewBox="0 0 170 170">
+            <circle cx="85" cy="85" r="74" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="9"/>
+            <circle id="parc" cx="85" cy="85" r="74" fill="none" stroke="#0078d4" stroke-width="9" stroke-linecap="round" stroke-dasharray="465" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear,stroke .4s"/>
+          </svg>
+          <div class="pring-txt">
+            <div class="pring-t" id="pDisp">25:00</div>
+            <div class="pring-l" id="pLbl">FOCUS</div>
+          </div>
+        </div>
+        <div class="pbtns">
+          <button class="pbtn psm" onclick="pomoReset()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <button class="pbtn pmain" id="pPlay" onclick="pomoToggle()">▶</button>
+          <button class="pbtn psm" onclick="pomoSkip()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 4l10 8-10 8V4zM19 4v16"/></svg></button>
+        </div>
+        <div class="ppips" id="ppips"></div>
+        <div class="ptask-s">
+          <div style="font-size:9px;color:#3a70b0;letter-spacing:2px;margin:12px 0 7px">TASKS</div>
+          <div id="pTaskList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<div class="taskbar">
-<div class="icon" onclick="openWin('study')">📚</div>
-<div class="icon" onclick="openWin('youtube')">▶️</div>
-<div class="icon" onclick="openWin('discord')">💬</div>
-</div>
+  <div id="winBrowser" class="win" style="top:40px;left:150px;width:880px;height:620px">
+    <div class="wbar" onmousedown="dragWin(event,'winBrowser')">
+      <svg class="wbar-ico" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#5590ff" stroke-width="1.2"/><path d="M7 1a6 6 0 0 1 0 12M7 1a6 6 0 0 0 0 12" stroke="#5590ff" stroke-width="1"/><path d="M1 7h12" stroke="#5590ff" stroke-width="1" opacity="0.6"/></svg>
+      <div class="wbar-title" id="browTitle">StudyBrowser</div>
+      <div class="wctrl">
+        <button class="wb" onclick="minW('winBrowser','ti-browser')"><svg viewBox="0 0 11 11" fill="currentColor"><rect x="0" y="4.5" width="11" height="2" rx="1"/></svg></button>
+        <button class="wb" onclick="maxW('winBrowser')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="9" height="9" rx="1"/></svg></button>
+        <button class="wb wclose" onclick="closeW('winBrowser','ti-browser')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l9 9M10 1L1 10"/></svg></button>
+      </div>
+    </div>
+    <div class="wbody" style="display:flex;flex-direction:column">
+      <div class="brow-tabs" id="browTabs">
+        <div class="btab-new" onclick="newTab()" title="New tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+      </div>
+      <div class="brow-bar">
+        <div class="brow-nav">
+          <button class="brow-nbtn" id="btnBack" onclick="browBack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
+          <button class="brow-nbtn" id="btnFwd" onclick="browFwd()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+          <button class="brow-nbtn" id="btnRef" onclick="browRefresh()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <button class="brow-nbtn" onclick="browHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+        </div>
+        <div class="brow-url">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="urlBar" placeholder="Search or enter a URL..." onkeydown="if(event.key==='Enter')browNav(this.value)">
+        </div>
+        <button class="brow-nbtn" onclick="browBookmark()" title="Bookmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+        <button class="brow-nbtn" onclick="openDevTools()" title="Dev tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
+      </div>
+      <div class="brow-loading" id="browLoad"></div>
+      <div class="brow-content" id="browContent"></div>
+    </div>
+  </div>
+
+  <div id="winCalc" class="win" style="top:80px;left:200px;width:320px;height:500px">
+    <div class="wbar" onmousedown="dragWin(event,'winCalc')">
+      <svg class="wbar-ico" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="1.5" stroke="#a0c0ff" stroke-width="1.2"/><path d="M5 5h4M5 7h2M5 9h4" stroke="#a0c0ff" stroke-width="1" stroke-linecap="round"/></svg>
+      <div class="wbar-title">Calculator</div>
+      <div class="wctrl">
+        <button class="wb" onclick="minW('winCalc','ti-calc')"><svg viewBox="0 0 11 11" fill="currentColor"><rect x="0" y="4.5" width="11" height="2" rx="1"/></svg></button>
+        <button class="wb" onclick="maxW('winCalc')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="9" height="9" rx="1"/></svg></button>
+        <button class="wb wclose" onclick="closeW('winCalc','ti-calc')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l9 9M10 1L1 10"/></svg></button>
+      </div>
+    </div>
+    <div class="wbody" id="calcBody" style="display:flex;flex-direction:column;background:#0e1018;height:100%"></div>
+  </div>
+
+  <div id="winNotes" class="win" style="top:80px;left:200px;width:420px;height:500px">
+    <div class="wbar" onmousedown="dragWin(event,'winNotes')">
+      <svg class="wbar-ico" viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="11" rx="1.5" stroke="#ffd060" stroke-width="1.2"/><path d="M4.5 5h5M4.5 7h5M4.5 9h3" stroke="#ffd060" stroke-width="1" stroke-linecap="round"/></svg>
+      <div class="wbar-title">Notepad</div>
+      <div class="wctrl">
+        <button class="wb" onclick="minW('winNotes','ti-notes')"><svg viewBox="0 0 11 11" fill="currentColor"><rect x="0" y="4.5" width="11" height="2" rx="1"/></svg></button>
+        <button class="wb" onclick="maxW('winNotes')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="9" height="9" rx="1"/></svg></button>
+        <button class="wb wclose" onclick="closeW('winNotes','ti-notes')"><svg viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l9 9M10 1L1 10"/></svg></button>
+      </div>
+    </div>
+    <div class="wbody" style="display:flex;flex-direction:column">
+      <div style="display:flex;gap:4px;padding:5px 8px;background:#0d0f1a;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0">
+        <button onclick="notesFmt('bold')" style="background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#ccc;padding:3px 8px;cursor:pointer;font-size:12px;font-weight:bold">B</button>
+        <button onclick="notesFmt('italic')" style="background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#ccc;padding:3px 8px;cursor:pointer;font-size:12px;font-style:italic">I</button>
+        <button onclick="notesFmt('underline')" style="background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#ccc;padding:3px 8px;cursor:pointer;font-size:12px;text-decoration:underline">U</button>
+        <select id="noteFontSize" onchange="notesFmt('fontSize',this.value)" style="background:#0d0f1a;border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#ccc;font-size:11px;cursor:pointer;padding:0 4px">
+          <option value="2">Small</option><option value="3" selected>Normal</option><option value="4">Large</option><option value="5">XL</option>
+        </select>
+        <button onclick="saveNote()" style="margin-left:auto;background:rgba(0,120,212,0.25);border:1px solid #0078d4;border-radius:4px;color:#60a0ff;padding:3px 10px;cursor:pointer;font-size:11px">Save</button>
+      </div>
+      <div id="notesArea" contenteditable="true" style="flex:1;padding:14px 16px;outline:none;font-size:13px;color:#c0d0e8;line-height:1.7;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1a2a50 transparent;background:#080c14">Start typing your notes here...</div>
+    </div>
+  </div>
+
+  <div class="taskbar">
+    <div class="tb-start" onclick="toggleStart()">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="1" y="1" width="8" height="8" rx="1.5" fill="#0078d4"/>
+        <rect x="11" y="1" width="8" height="8" rx="1.5" fill="#0078d4" opacity="0.72"/>
+        <rect x="1" y="11" width="8" height="8" rx="1.5" fill="#0078d4" opacity="0.72"/>
+        <rect x="11" y="11" width="8" height="8" rx="1.5" fill="#0078d4" opacity="0.52"/>
+      </svg>
+    </div>
+    <div class="tb-search" onclick="toggleStart()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Search</span>
+    </div>
+    <div class="tb-mid" id="tbMid"></div>
+    <div class="tb-right">
+      <div class="tb-sys-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.8" width="14" height="14"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.8" width="14" height="14"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </div>
+      <div class="tb-clock" id="tbClock" onclick="toggleNotif()">12:00<br>00/00/0000</div>
+    </div>
+  </div>
+
+  <div class="start-menu" id="smenu">
+    <div class="sm-srch">
+      <div class="sm-sbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Type to search...">
+      </div>
+    </div>
+    <div class="sm-sec">
+      <div class="sm-sec-h">Pinned</div>
+      <div class="sm-pins" id="smPins"></div>
+    </div>
+    <div class="sm-bot">
+      <div class="sm-user"><div class="sm-uav">🎓</div><div class="sm-uname">Student</div></div>
+      <div class="sm-pwr-row">
+        <button class="sm-pwrbtn" title="Restart" onclick="shutdown()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+        <button class="sm-pwrbtn" title="Sign out" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notif-panel" id="npanel">
+    <div class="np-h"><span>Notifications</span><span class="np-clr" onclick="clearNotifs()">Clear all</span></div>
+    <div class="np-body" id="npbody">
+      <div class="ncard"><div class="ncard-app">StudyOS</div><div class="ncard-msg">Exam 1 is tomorrow at 11:30 AM. Time to review!</div><div class="ncard-t">Just now</div></div>
+      <div class="ncard"><div class="ncard-app">Pomodoro</div><div class="ncard-msg">Start a focus session to stay on track.</div><div class="ncard-t">5 min ago</div></div>
+      <div class="ncard"><div class="ncard-app">Browser</div><div class="ncard-msg">StudyBrowser ready — search anything directly.</div><div class="ncard-t">10 min ago</div></div>
+    </div>
+    <div class="np-widgets">
+      <div class="npwh">Widgets</div>
+      <div class="ww"><div><div class="ww-t">18°C</div><div class="ww-i">Mississauga, ON · Partly Cloudy</div></div><div class="ww-e">⛅</div></div>
+      <div class="cal"><div class="cal-m" id="calMonth"></div><div class="cal-g" id="calGrid"></div></div>
+    </div>
+  </div>
 </div>
 
 <script>
-setTimeout(() => {
-  document.getElementById("boot").style.display = "none";
-  document.getElementById("login").style.display = "flex";
-}, 3000);
-
-function doLogin(){
- if(pw.value==='1234'){login.style.display='none';desktop.style.display='block'}
- else{error.textContent='Incorrect password';pw.value=''}
-}
-
-function openWin(id){document.getElementById(id).style.display='block'}
-function closeWin(id){document.getElementById(id).style.display='none'}
-
-const exams=[
-{name:'Exam 1',time:new Date('2026-06-16T11:30:00')},
-{name:'Exam 2',time:new Date('2026-06-17T08:15:00')},
-{name:'Exam 3',time:new Date('2026-06-19T08:15:00')}
+const PIN='1234';
+const QUOTES=[
+  '"The secret of getting ahead is getting started." — Mark Twain',
+  '"It always seems impossible until it\'s done." — Nelson Mandela',
+  '"Success is the sum of small efforts, repeated." — R. Collier',
+  '"Don\'t watch the clock; do what it does. Keep going." — S. Levenson',
+  '"Learning never exhausts the mind." — Leonardo da Vinci',
+  '"The more you know, the more you realize you don\'t know." — Aristotle',
+  '"An investment in knowledge pays the best interest." — B. Franklin',
+];
+const TASKS=['Review lecture notes','Complete practice problems','Read Chapter 7','Write essay draft','Solve past papers','Email professor'];
+const EXAMS=[
+  {name:'Exam 1',time:new Date('2026-06-16T11:30:00')},
+  {name:'Exam 2',time:new Date('2026-06-17T08:15:00')},
+  {name:'Exam 3',time:new Date('2026-06-19T08:15:00')},
+];
+const APPS=[
+  {id:'winStudy',ti:'ti-study',name:'Dashboard',icon:studyIcon},
+  {id:'winPomo',ti:'ti-pomo',name:'Pomodoro',icon:pomoIcon},
+  {id:'winBrowser',ti:'ti-browser',name:'Browser',icon:browserIcon},
+  {id:'winCalc',ti:'ti-calc',name:'Calculator',icon:calcIcon},
+  {id:'winNotes',ti:'ti-notes',name:'Notepad',icon:notesIcon},
 ];
 
-function update(){
- let ex=exams.find(e=>e.time>new Date());
- if(!ex){exam.textContent='All exams completed';count.textContent='🎉';return;}
- let d=ex.time-new Date();
- let s=Math.floor(d/1000),days=Math.floor(s/86400);s%=86400;
- let h=Math.floor(s/3600);s%=3600;
- let m=Math.floor(s/60);let sec=s%60;
- exam.textContent=ex.name+' - Next Exam';
- count.textContent=`${days}d ${h}h ${m}m ${sec}s`;
+function studyIcon(s){return`<svg viewBox="0 0 ${s} ${s}" fill="none"><rect x="${s*.05}" y="${s*.1}" width="${s*.9}" height="${s*.75}" rx="${s*.08}" fill="#1a3560" stroke="#4488cc" stroke-width="${s*.04}"/><path d="M${s*.25} ${s*.35}h${s*.5}M${s*.25} ${s*.55}h${s*.32}" stroke="#60a0ff" stroke-width="${s*.04}" stroke-linecap="round"/></svg>`}
+function pomoIcon(s){return`<svg viewBox="0 0 ${s} ${s}" fill="none"><circle cx="${s*.5}" cy="${s*.55}" r="${s*.38}" fill="#1a0808" stroke="#ff4444" stroke-width="${s*.04}"/><path d="M${s*.5} ${s*.3}v${s*.25}l${s*.18} ${s*.13}" stroke="#ff4444" stroke-width="${s*.04}" stroke-linecap="round"/><path d="M${s*.35} ${s*.15}c0-${s*.1} ${s*.1}-${s*.12} ${s*.15}-${s*.12}s${s*.15} ${s*.02} ${s*.15} ${s*.12}" stroke="#4a8a3a" stroke-width="${s*.04}" stroke-linecap="round"/></svg>`}
+function browserIcon(s){return`<svg viewBox="0 0 ${s} ${s}" fill="none"><circle cx="${s*.5}" cy="${s*.5}" r="${s*.42}" fill="#0a1530" stroke="#5590ff" stroke-width="${s*.04}"/><ellipse cx="${s*.5}" cy="${s*.5}" rx="${s*.17}" ry="${s*.42}" stroke="#5590ff" stroke-width="${s*.03}"/><path d="M${s*.08} ${s*.5}h${s*.84}" stroke="#5590ff" stroke-width="${s*.03}" opacity=".6"/><path d="M${s*.13} ${s*.3}h${s*.74}M${s*.13} ${s*.7}h${s*.74}" stroke="#5590ff" stroke-width="${s*.025}" opacity=".4"/></svg>`}
+function calcIcon(s){return`<svg viewBox="0 0 ${s} ${s}" fill="none"><rect x="${s*.12}" y="${s*.08}" width="${s*.76}" height="${s*.84}" rx="${s*.1}" fill="#111828" stroke="#8090c0" stroke-width="${s*.04}"/><rect x="${s*.2}" y="${s*.15}" width="${s*.6}" height="${s*.2}" rx="${s*.04}" fill="#1a2a50"/><path d="M${s*.25} ${s*.55}h${s*.15}M${s*.43} ${s*.55}h${s*.15}M${s*.61} ${s*.55}h${s*.15}" stroke="#8090c0" stroke-width="${s*.04}" stroke-linecap="round"/><path d="M${s*.25} ${s*.72}h${s*.15}M${s*.43} ${s*.72}h${s*.15}M${s*.61} ${s*.72}h${s*.15}" stroke="#8090c0" stroke-width="${s*.04}" stroke-linecap="round"/></svg>`}
+function notesIcon(s){return`<svg viewBox="0 0 ${s} ${s}" fill="none"><rect x="${s*.12}" y="${s*.06}" width="${s*.72}" height="${s*.88}" rx="${s*.08}" fill="#1a1408" stroke="#ffc040" stroke-width="${s*.04}"/><path d="M${s*.25} ${s*.28}h${s*.5}M${s*.25} ${s*.44}h${s*.5}M${s*.25} ${s*.6}h${s*.5}M${s*.25} ${s*.76}h${s*.3}" stroke="#ffd060" stroke-width="${s*.038}" stroke-linecap="round"/></svg>`}
+
+function buildDesktopIcons(){
+  const c=document.getElementById('dicons');c.innerHTML='';
+  APPS.forEach(a=>{
+    const d=document.createElement('div');d.className='dic';d.id='dic_'+a.id;
+    d.innerHTML=a.icon(38)+'<div class="dic-lbl">'+a.name+'</div>';
+    d.ondblclick=()=>{toggleW(a.id,a.ti);closeStart();};
+    d.onclick=e=>{e.stopPropagation();document.querySelectorAll('.dic').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');};
+    c.append(d);
+  });
 }
-setInterval(update,1000);update();
+
+function buildTaskbar(){
+  const mid=document.getElementById('tbMid');mid.innerHTML='';
+  APPS.forEach(a=>{
+    const d=document.createElement('div');d.className='tbi';d.id=a.ti;d.title=a.name;
+    d.innerHTML=a.icon(22)+'<div class="tbi-dot"></div>';
+    d.onclick=()=>toggleW(a.id,a.ti);
+    mid.append(d);
+  });
+}
+
+function buildStartPins(){
+  const c=document.getElementById('smPins');c.innerHTML='';
+  APPS.forEach(a=>{
+    const d=document.createElement('div');d.className='sm-pin';
+    d.innerHTML=a.icon(30)+'<span>'+a.name+'</span>';
+    d.onclick=()=>{toggleW(a.id,a.ti);closeStart();};
+    c.append(d);
+  });
+}
+
+let zc=20;
+function bringFront(id){document.getElementById(id).style.zIndex=++zc;}
+function toggleW(id,ti){
+  const w=document.getElementById(id),t=ti?document.getElementById(ti):null;
+  if(w.classList.contains('on')){w.classList.remove('on');if(t)t.classList.remove('on');}
+  else{w.classList.add('on');bringFront(id);if(t)t.classList.add('on');}
+}
+function closeW(id,ti){const w=document.getElementById(id);w.classList.remove('on');const t=ti?document.getElementById(ti):null;if(t)t.classList.remove('on');}
+function minW(id,ti){closeW(id,ti);}
+const maxState={};
+function maxW(id){
+  const w=document.getElementById(id);
+  if(maxState[id]){Object.assign(w.style,maxState[id]);delete maxState[id];}
+  else{maxState[id]={top:w.style.top,left:w.style.left,width:w.style.width,height:w.style.height,borderRadius:w.style.borderRadius};Object.assign(w.style,{top:'0',left:'0',width:'100vw',height:'calc(100vh - 48px)',borderRadius:'0'});}
+  bringFront(id);
+}
+function dragWin(e,id){
+  if(maxState[id])return;
+  const w=document.getElementById(id);bringFront(id);
+  const ox=e.clientX-w.offsetLeft,oy=e.clientY-w.offsetTop;
+  const mv=ev=>{w.style.left=(ev.clientX-ox)+'px';w.style.top=Math.max(0,ev.clientY-oy)+'px';};
+  const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);};
+  document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up);
+}
+
+function toggleStart(){document.getElementById('smenu').classList.toggle('on');}
+function closeStart(){document.getElementById('smenu').classList.remove('on');}
+function toggleNotif(){document.getElementById('npanel').classList.toggle('on');}
+function clearNotifs(){document.getElementById('npbody').innerHTML='<div style="font-size:12px;color:#3a5070;text-align:center;padding:20px">No notifications</div>';}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#smenu')&&!e.target.closest('.tb-start')&&!e.target.closest('.tb-search'))closeStart();
+  if(!e.target.closest('#npanel')&&!e.target.closest('.tb-clock'))document.getElementById('npanel').classList.remove('on');
+  if(!e.target.closest('.dic'))document.querySelectorAll('.dic').forEach(x=>x.classList.remove('sel'));
+});
+
+function logout(){
+  document.getElementById('desktop').classList.remove('active');
+  document.getElementById('pinIn').value='';document.getElementById('lerr').textContent='';
+  document.getElementById('login').classList.add('active');
+  closeStart();document.getElementById('npanel').classList.remove('on');
+}
+function shutdown(){
+  document.getElementById('desktop').classList.remove('active');
+  document.getElementById('login').classList.remove('active');
+  document.getElementById('boot').classList.add('active');
+  setTimeout(()=>{document.getElementById('boot').classList.remove('active');document.getElementById('login').classList.add('active');},2500);
+}
+
+document.getElementById('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogin(){
+  if(document.getElementById('pinIn').value===PIN){
+    document.getElementById('login').classList.remove('active');
+    document.getElementById('desktop').classList.add('active');
+    initDesktop();
+  } else {
+    document.getElementById('lerr').textContent='Incorrect PIN. Try 1234.';
+    document.getElementById('pinIn').value='';
+    setTimeout(()=>document.getElementById('lerr').textContent='',3000);
+  }
+}
+
+function initDesktop(){
+  buildDesktopIcons();buildTaskbar();buildStartPins();buildWallpaper();
+  buildCalc();buildNotes();initBrowser();buildStudy();buildPomo();buildCalendar();
+  startClock();updateExams();setInterval(updateExams,1000);
+}
+
+function startClock(){
+  const tick=()=>{
+    const n=new Date();
+    const H=String(n.getHours()).padStart(2,'0'),M=String(n.getMinutes()).padStart(2,'0'),S=String(n.getSeconds()).padStart(2,'0');
+    const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('tbClock').innerHTML=`${H}:${M}<br>${String(n.getDate()).padStart(2,'0')}/${String(n.getMonth()+1).padStart(2,'0')}/${n.getFullYear()}`;
+    const lt=document.getElementById('ltime');if(lt)lt.textContent=`${H}:${M}`;
+    const ld=document.getElementById('ldate');if(ld)ld.textContent=`${days[n.getDay()]}, ${months[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
+    const bnt=document.getElementById('bnt-time');if(bnt)bnt.textContent=`${H}:${M}`;
+    const bnd=document.getElementById('bnt-date');if(bnd)bnd.textContent=`${days[n.getDay()]}, ${months[n.getMonth()]} ${n.getDate()}`;
+  };
+  tick();setInterval(tick,1000);
+}
+startClock();
+
+function updateExams(){
+  const now=new Date(),list=document.getElementById('sExList');
+  if(!list)return;
+  list.innerHTML='';let next=null,left=0;
+  EXAMS.forEach(e=>{
+    const done=e.time<=now;if(!done){left++;if(!next)next=e;}
+    const r=document.createElement('div');r.className='sexi';
+    const dot=document.createElement('div');dot.className='sexd'+(done?' dn':e===next?' nxt':'');
+    const nm=document.createElement('div');nm.className='sexn';nm.textContent=e.name;
+    const tm=document.createElement('div');tm.className='sext';tm.textContent=e.time.toLocaleDateString('en-CA',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    r.append(dot,nm,tm);list.append(r);
+  });
+  document.getElementById('sExams').textContent=left;
+  if(!next){document.getElementById('sName').textContent='All done!';document.getElementById('sCD').innerHTML='🎉';document.getElementById('sDays').textContent='0';document.getElementById('sHours').textContent='0';return;}
+  document.getElementById('sName').textContent=next.name;
+  let d=next.time-now;
+  const days=Math.floor(d/86400000);d%=86400000;
+  const h=Math.floor(d/3600000);d%=3600000;
+  const m=Math.floor(d/60000);d%=60000;const s=Math.floor(d/1000);
+  document.getElementById('sCD').innerHTML=`<span>d</span>${days} <span>h</span>${h} <span>m</span>${m} <span>s</span>${s}`;
+  document.getElementById('sDays').textContent=days;
+  document.getElementById('sHours').textContent=days*24+h;
+}
+
+function buildStudy(){
+  document.getElementById('sQuote').textContent=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  const tl=document.getElementById('sTaskList');tl.innerHTML='';
+  TASKS.forEach(t=>{
+    const d=document.createElement('div');d.className='stask-i';
+    d.innerHTML='<div class="stask-cb"></div>'+t;
+    d.onclick=()=>{d.classList.toggle('dn');d.querySelector('.stask-cb').textContent=d.classList.contains('dn')?'✓':''};
+    tl.append(d);
+  });
+}
+
+const POMO_MODES={focus:{l:'FOCUS',t:25*60,c:'#0078d4'},short:{l:'SHORT BREAK',t:5*60,c:'#107c10'},long:{l:'LONG BREAK',t:15*60,c:'#8764b8'}};
+let pMode='focus',pLeft=25*60,pTotal=25*60,pRun=false,pInt=null,pCount=0;
+function setPomoMode(m){
+  pMode=m;pRun=false;clearInterval(pInt);
+  document.getElementById('pPlay').textContent='▶';
+  const md=POMO_MODES[m];pLeft=pTotal=md.t;
+  document.getElementById('parc').style.stroke=md.c;
+  document.getElementById('pLbl').textContent=md.l;
+  ['focus','short','long'].forEach(k=>document.getElementById('pt-'+k).classList.toggle('on',k===m));
+  drawPomo();
+}
+function drawPomo(){
+  const m=Math.floor(pLeft/60),s=pLeft%60;
+  document.getElementById('pDisp').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('parc').style.strokeDashoffset=(2*Math.PI*74)*(1-pLeft/pTotal);
+}
+function pomoToggle(){
+  if(pRun){clearInterval(pInt);pRun=false;document.getElementById('pPlay').textContent='▶';}
+  else{pRun=true;document.getElementById('pPlay').textContent='⏸';pInt=setInterval(()=>{if(pLeft<=0){clearInterval(pInt);pRun=false;document.getElementById('pPlay').textContent='▶';if(pMode==='focus'){pCount++;buildPomoPips();}return;}pLeft--;drawPomo();},1000);}
+}
+function pomoReset(){clearInterval(pInt);pRun=false;document.getElementById('pPlay').textContent='▶';pLeft=pTotal;drawPomo();}
+function pomoSkip(){clearInterval(pInt);pRun=false;document.getElementById('pPlay').textContent='▶';pLeft=0;drawPomo();}
+function buildPomoPips(){const c=document.getElementById('ppips');c.innerHTML='';for(let i=0;i<4;i++){const d=document.createElement('div');d.className='ppip'+(i<pCount?' dn':'');c.append(d);}}
+function buildPomo(){
+  drawPomo();buildPomoPips();
+  const tl=document.getElementById('pTaskList');tl.innerHTML='';
+  TASKS.slice(0,4).forEach(t=>{
+    const d=document.createElement('div');d.className='stask-i';
+    d.innerHTML='<div class="stask-cb"></div>'+t;
+    d.onclick=()=>{d.classList.toggle('dn');d.querySelector('.stask-cb').textContent=d.classList.contains('dn')?'✓':''};
+    tl.append(d);
+  });
+}
+
+let browTabs=[],activeBrowTab=0;
+const SHORTCUTS=[
+  {name:'Google',url:'https://www.google.com',ico:'🔍'},
+  {name:'Wikipedia',url:'https://en.m.wikipedia.org',ico:'📖'},
+  {name:'Khan',url:'https://www.khanacademy.org',ico:'🎓'},
+  {name:'Desmos',url:'https://www.desmos.com/calculator',ico:'📈'},
+  {name:'Wolfram',url:'https://www.wolframalpha.com',ico:'⭐'},
+];
+
+function initBrowser(){
+  newTab();
+}
+
+function newTab(url){
+  const id=Date.now();
+  const tab={id,url:url||'',title:'New Tab',history:[url||''],hIdx:0};
+  browTabs.push(tab);
+  activeBrowTab=browTabs.length-1;
+  renderTabs();
+  renderBrowContent();
+}
+
+function renderTabs(){
+  const c=document.getElementById('browTabs');c.innerHTML='';
+  browTabs.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='btab'+(i===activeBrowTab?' active-tab':'');
+    d.innerHTML=`<span style="flex:1;overflow:hidden;text-overflow:ellipsis">${t.title}</span><div class="btab-close" onclick="closeTab(${i},event)">×</div>`;
+    d.onclick=e=>{if(!e.target.classList.contains('btab-close')){activeBrowTab=i;renderTabs();renderBrowContent();}};
+    c.append(d);
+  });
+  const nb=document.createElement('div');nb.className='btab-new';nb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>';nb.title='New tab';nb.onclick=()=>newTab();c.append(nb);
+}
+
+function closeTab(i,e){
+  e.stopPropagation();browTabs.splice(i,1);
+  if(!browTabs.length){newTab();return;}
+  if(activeBrowTab>=browTabs.length)activeBrowTab=browTabs.length-1;
+  renderTabs();renderBrowContent();
+}
+
+function renderBrowContent(){
+  const tab=browTabs[activeBrowTab];
+  const c=document.getElementById('browContent');
+  c.innerHTML='';
+  document.getElementById('urlBar').value=tab.url||'';
+  document.getElementById('browTitle').textContent=tab.title||'StudyBrowser';
+  if(!tab.url){
+    const nt=document.createElement('div');nt.className='brow-newtab';
+    nt.innerHTML=`<div class="bnt-time" id="bnt-time">00:00</div><div class="bnt-date" id="bnt-date"></div><div class="bnt-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="bntSrch" placeholder="Search the web or enter a URL..." onkeydown="if(event.key==='Enter'){browNav(this.value);}"></div><div class="bnt-shortcuts">${SHORTCUTS.map(s=>`<div class="bnt-sc" onclick="browNav('${s.url}')"><div class="bnt-sc-ico">${s.ico}</div><div class="bnt-sc-lbl">${s.name}</div></div>`).join('')}</div>`;
+    c.append(nt);
+    startClock();
+  } else {
+    const frame=document.createElement('iframe');
+    frame.className='brow-frame';
+    frame.src=tab.url;
+    frame.setAttribute('sandbox','allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation');
+    frame.onload=()=>{
+      try{const t=frame.contentDocument&&frame.contentDocument.title;if(t){tab.title=t;renderTabs();}}catch(e){}
+      hideBrowLoad();
+    };
+    frame.onerror=()=>{showBrowError(tab.url);hideBrowLoad();};
+    frame.id='brow-frame-'+tab.id;
+    c.append(frame);
+    showBrowLoad();
+    setTimeout(hideBrowLoad,8000);
+  }
+}
+
+function browNav(v){
+  v=v.trim();if(!v)return;
+  let url=v;
+  if(!/^https?:\/\//i.test(v)&&/\s/.test(v))url='https://www.google.com/search?q='+encodeURIComponent(v);
+  else if(!/^https?:\/\//i.test(v)&&!/\./.test(v))url='https://www.google.com/search?q='+encodeURIComponent(v);
+  else if(!/^https?:\/\//i.test(v))url='https://'+v;
+  const tab=browTabs[activeBrowTab];
+  tab.url=url;tab.history=tab.history.slice(0,tab.hIdx+1);tab.history.push(url);tab.hIdx=tab.history.length-1;
+  renderTabs();renderBrowContent();
+}
+
+function browBack(){const tab=browTabs[activeBrowTab];if(tab.hIdx>0){tab.hIdx--;tab.url=tab.history[tab.hIdx];renderBrowContent();}}
+function browFwd(){const tab=browTabs[activeBrowTab];if(tab.hIdx<tab.history.length-1){tab.hIdx++;tab.url=tab.history[tab.hIdx];renderBrowContent();}}
+function browRefresh(){const tab=browTabs[activeBrowTab];renderBrowContent();}
+function browHome(){const tab=browTabs[activeBrowTab];tab.url='';tab.title='New Tab';renderBrowContent();}
+function browBookmark(){alert('Bookmarked: '+browTabs[activeBrowTab].url);}
+function openDevTools(){alert('DevTools: Not available in this environment.');}
+
+function showBrowLoad(){
+  const l=document.getElementById('browLoad');l.style.transition='none';l.style.transform='scaleX(0)';
+  setTimeout(()=>{l.style.transition='transform 3s ease';l.style.transform='scaleX(0.7)';},50);
+}
+function hideBrowLoad(){const l=document.getElementById('browLoad');l.style.transition='transform .2s';l.style.transform='scaleX(1)';setTimeout(()=>{l.style.transform='scaleX(0)';l.style.transition='none';},220);}
+
+function showBrowError(url){
+  const c=document.getElementById('browContent');c.innerHTML=`<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0c18;color:#5070a0;gap:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><div style="font-size:18px;font-weight:200;color:#8090b0">Can't reach this page</div><div style="font-size:12px;max-width:360px;text-align:center;line-height:1.6">This site blocks embedding. Try opening it from the address bar or search for it below.</div><button onclick="browNav('https://www.google.com/search?q=${encodeURIComponent(url)}')" style="margin-top:8px;padding:8px 20px;background:rgba(0,120,212,0.2);border:1px solid #0078d4;border-radius:20px;color:#60a0ff;cursor:pointer;font-size:13px">Search Google instead</button></div>`;}
+
+let calcExpr='',calcPrev='';
+function buildCalc(){
+  const body=document.getElementById('calcBody');
+  body.innerHTML=`<div style="flex:1;display:flex;flex-direction:column;padding:12px;gap:8px">
+<div style="text-align:right;padding:8px 10px;background:#0d1020;border-radius:7px;margin-bottom:0">
+  <div id="cPrev" style="font-size:11px;color:#4a6090;min-height:16px"></div>
+  <div id="cDisp" style="font-size:32px;font-weight:200;color:#d0e0ff;word-break:break-all">0</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:1">
+${[['C','±','%','÷'],['7','8','9','×'],['4','5','6','−'],['1','2','3','+'],['0','.','\u232b','=']].map(row=>row.map(k=>`<button onclick="calcKey('${k}')" style="border-radius:8px;border:none;cursor:pointer;font-size:${k==='0'?'18':'16'}px;font-weight:${['÷','×','−','+','='].includes(k)?'400':'300'};background:${ k==='='?'#0078d4':['÷','×','−','+'].includes(k)?'rgba(0,120,212,0.2)':k==='C'?'rgba(200,50,50,0.18)':'rgba(255,255,255,0.06)'};color:${ k==='='?'#fff':['÷','×','−','+'].includes(k)?'#60a0ff':'#c0d0f0'};transition:background .12s;height:100%" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='none'">${k}</button>`).join('')).join('')}
+</div></div>`;
+}
+function calcKey(k){
+  const ops=['÷','×','−','+'];
+  if(k==='C'){calcExpr='';calcPrev='';updCalc('0');}
+  else if(k==='='){
+    try{
+      const e=calcExpr.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
+      const r=Function('"use strict";return ('+e+')')();
+      calcPrev=calcExpr+'=';calcExpr=String(parseFloat(r.toFixed(10)));updCalc(calcExpr);
+    }catch{updCalc('Error');}
+  }
+  else if(k==='⌫'){calcExpr=calcExpr.slice(0,-1)||'';updCalc(calcExpr||'0');}
+  else if(k==='±'){calcExpr=calcExpr.startsWith('-')?calcExpr.slice(1):'-'+calcExpr;updCalc(calcExpr);}
+  else if(k==='%'){try{calcExpr=String(parseFloat(calcExpr)/100);}catch{}updCalc(calcExpr);}
+  else{calcExpr+=k;updCalc(calcExpr);}
+}
+function updCalc(v){
+  const d=document.getElementById('cDisp'),p=document.getElementById('cPrev');
+  if(d)d.textContent=v;if(p)p.textContent=calcPrev;
+}
+
+function notesFmt(cmd,val){document.getElementById('notesArea').focus();document.execCommand(cmd,false,val||null);}
+function saveNote(){const v=document.getElementById('notesArea').innerHTML;localStorage&&localStorage.setItem('studyos_note',v);showToast('Note saved!');}
+function loadNote(){try{const v=localStorage&&localStorage.getItem('studyos_note');if(v)document.getElementById('notesArea').innerHTML=v;}catch{}}
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:64px;left:50%;transform:translateX(-50%);background:rgba(0,120,212,0.9);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s';document.body.append(t);}
+  t.textContent=msg;t.style.opacity='1';setTimeout(()=>t.style.opacity='0',2000);
+}
+
+function buildCalendar(){
+  const now=new Date();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonth').textContent=months[now.getMonth()]+' '+now.getFullYear();
+  const g=document.getElementById('calGrid');g.innerHTML='';
+  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d=>{const el=document.createElement('div');el.className='cal-dh';el.textContent=d;g.append(el);});
+  const first=new Date(now.getFullYear(),now.getMonth(),1).getDay();
+  const total=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const prev=new Date(now.getFullYear(),now.getMonth(),0).getDate();
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='cal-d om';el.textContent=prev-first+1+i;g.append(el);}
+  for(let i=1;i<=total;i++){const el=document.createElement('div');el.className='cal-d'+(i===now.getDate()?' today':'');el.textContent=i;g.append(el);}
+}
+
+function buildWallpaper(){
+  const c=document.getElementById('wpcanvas'),ctx=c.getContext('2d');
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  const W=c.width,H=c.height;
+  const g=ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,'#020408');g.addColorStop(.35,'#040a18');g.addColorStop(.7,'#030710');g.addColorStop(1,'#020308');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  [[W*.15,H*.8,W*.6,0,80,200,0.25],[W*.8,H*.3,W*.55,80,0,200,0.18],[W*.5,H*.95,W*.45,0,100,160,0.14],[W*.3,H*.4,W*.3,60,60,200,0.1]].forEach(([x,y,r,rr,gg,bb,a])=>{
+    const gr=ctx.createRadialGradient(x,y,0,x,y,r);
+    gr.addColorStop(0,`rgba(${rr},${gg},${bb},${a})`);gr.addColorStop(1,'transparent');
+    ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
+  });
+  for(let i=0;i<300;i++){
+    ctx.beginPath();const sz=Math.random()*1.4;
+    ctx.arc(Math.random()*W,Math.random()*H,sz,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${.2+Math.random()*.8})`;ctx.fill();
+  }
+  for(let i=0;i<60;i++){
+    ctx.beginPath();ctx.arc(Math.random()*W,Math.random()*H,Math.random()*.5,0,Math.PI*2);
+    ctx.fillStyle=`rgba(80,140,255,${.4+Math.random()*.5})`;ctx.fill();
+  }
+  ctx.save();ctx.globalAlpha=.04;ctx.strokeStyle='#4060ff';ctx.lineWidth=.8;
+  for(let i=0;i<10;i++){ctx.beginPath();ctx.moveTo(W*(.05+i*.1),H*.9);ctx.quadraticCurveTo(W*(.15+i*.09),H*.15,W*(.2+i*.09),H*.95);ctx.stroke();}
+  ctx.restore();
+}
+
+function initStars(){
+  const c=document.getElementById('lstars');if(!c)return;
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  const ctx=c.getContext('2d');
+  for(let i=0;i<180;i++){ctx.beginPath();const r=Math.random()*1.2;ctx.arc(Math.random()*c.width,Math.random()*c.height,r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${.2+Math.random()*.7})`;ctx.fill();}
+}
+
+setTimeout(()=>{
+  document.getElementById('boot').classList.remove('active');
+  document.getElementById('login').classList.add('active');
+  initStars();
+},3000);
 </script>
 </body>
 </html>
