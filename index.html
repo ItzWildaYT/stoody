@@ -4,217 +4,102 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyOS 11</title>
-
 <style>
-body { margin:0; font-family:Segoe UI, Arial; overflow:hidden; background:#0b1220; color:#e5e7eb; }
-
-.boot { position:absolute; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; align-items:center; }
-.bootTitle { font-size:2rem; font-weight:700; color:#38bdf8; }
-.bootBar { width:220px; height:4px; background:#1f2937; margin-top:20px; border-radius:999px; overflow:hidden; }
-.bootFill { width:0%; height:100%; background:#38bdf8; }
-
-.desktop { display:none; width:100vw; height:100vh; background:radial-gradient(circle at top,#1e293b,#0f172a); position:relative; }
-
-.taskbar { position:absolute; bottom:0; left:0; right:0; height:55px; background:rgba(0,0,0,0.65); display:flex; align-items:center; padding:0 10px; backdrop-filter:blur(10px); }
-
-.startBtn { width:38px; height:38px; background:url("assets/windows.png") center/cover; cursor:pointer; }
-
-.taskIcons { display:flex; gap:10px; margin-left:20px; }
-
-.taskIcon { width:32px; height:32px; border-radius:6px; cursor:pointer; }
-
-.clock { margin-left:auto; font-size:0.85rem; opacity:0.85; }
-
-.startMenu { position:absolute; bottom:65px; left:10px; width:260px; background:rgba(15,23,42,0.95); border-radius:12px; padding:10px; display:none; }
-
-.menuItem { padding:10px; border-radius:8px; cursor:pointer; }
-.menuItem:hover { background:rgba(255,255,255,0.08); }
-
-.iconGrid { position:absolute; top:20px; left:20px; display:flex; flex-direction:column; gap:20px; }
-
-.desktopIcon { width:70px; text-align:center; cursor:pointer; font-size:0.75rem; }
-
-.desktopIcon img { width:48px; height:48px; display:block; margin:0 auto 5px; }
-
-.window { position:absolute; width:520px; background:rgba(255,255,255,0.06); backdrop-filter:blur(14px); border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,0.7); display:none; }
-
-.titleBar { padding:10px; background:rgba(0,0,0,0.5); display:flex; justify-content:space-between; border-radius:12px 12px 0 0; }
-
-.content { padding:15px; }
-
-.big { font-size:1.2rem; font-weight:800; color:#38bdf8; margin-bottom:10px; }
-
-.timer { font-size:2rem; font-weight:900; margin:10px 0; }
-
-.badge { display:inline-block; padding:5px 10px; background:#38bdf8; color:#0f172a; border-radius:999px; font-weight:700; }
-
-.warn { color:#fbbf24; font-weight:700; }
-
-.danger { color:#ef4444; font-weight:700; }
-
-.bar { width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:999px; overflow:hidden; margin-top:10px; }
-
-.fill { height:100%; width:0%; background:#38bdf8; }
-
-.appFrame { width:100%; height:300px; border:none; background:#0f172a; border-radius:10px; margin-top:10px; }
-
-.closeBtn { cursor:pointer; }
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#000;color:#fff;overflow:hidden}
+.screen{position:fixed;inset:0}
+#boot{display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000}
+.logo{font-size:48px;font-weight:700}
+.spinner{width:42px;height:42px;border:4px solid #333;border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;margin-top:24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#login{display:none;background:linear-gradient(135deg,#0f172a,#1e293b);justify-content:center;align-items:center;flex-direction:column}
+.card{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);padding:30px;border-radius:20px;width:340px;text-align:center}
+input{width:100%;padding:12px;border-radius:10px;border:none;margin-top:12px}
+button{width:100%;padding:12px;border:none;border-radius:10px;margin-top:12px;cursor:pointer}
+#error{color:#ff6b6b;height:20px}
+#desktop{display:none;background:linear-gradient(135deg,#0b1220,#172554)}
+.taskbar{position:absolute;bottom:0;left:0;right:0;height:58px;background:rgba(20,20,20,.75);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;gap:16px}
+.icon{width:42px;height:42px;background:#ffffff22;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.window{position:absolute;top:60px;left:80px;width:85vw;height:78vh;background:#111827;border-radius:18px;display:none;overflow:hidden;border:1px solid #ffffff22}
+.titlebar{height:48px;background:#1f2937;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+iframe{width:100%;height:calc(100% - 48px);border:none}
+.content{padding:20px}
+.timer{font-size:32px;font-weight:700}
 </style>
-
 </head>
-
 <body>
-
-<div class="boot" id="boot">
-  <div class="bootTitle">StudyOS 11</div>
-  <div class="bootBar"><div class="bootFill" id="bootFill"></div></div>
+<div id="boot" class="screen">
+<div class="logo">StudyOS 11</div>
+<div class="spinner"></div>
 </div>
 
-<div class="desktop" id="desktop">
+<div id="login" class="screen">
+<div class="card">
+<h2>Welcome</h2>
+<p>Password required</p>
+<input id="pw" type="password" placeholder="Enter password">
+<button onclick="doLogin()">Sign In</button>
+<div id="error"></div>
+</div>
+</div>
 
-  <div class="iconGrid">
-    <div class="desktopIcon" onclick="openApp('study')">
-      <img src="assets/study.png">
-      Study Panel
-    </div>
+<div id="desktop" class="screen">
+<div id="study" class="window">
+<div class="titlebar"><span>Study Dashboard</span><span onclick="closeWin('study')" style="cursor:pointer">✕</span></div>
+<div class="content">
+<h1>NOW LET ME STUDY.</h1>
+<div id="exam"></div>
+<div id="count" class="timer"></div>
+</div>
+</div>
 
-    <div class="desktopIcon" onclick="openApp('youtube')">
-      <img src="assets/youtube.png">
-      YouTube
-    </div>
+<div id="youtube" class="window">
+<div class="titlebar"><span>YouTube</span><span onclick="closeWin('youtube')" style="cursor:pointer">✕</span></div>
+<iframe src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
+</div>
 
-    <div class="desktopIcon" onclick="openApp('discord')">
-      <img src="assets/discord.png">
-      Discord
-    </div>
-  </div>
+<div id="discord" class="window">
+<div class="titlebar"><span>Discord</span><span onclick="closeWin('discord')" style="cursor:pointer">✕</span></div>
+<iframe src="https://discord.com/app"></iframe>
+</div>
 
-  <div class="window" id="studyWin">
-    <div class="titleBar">
-      <span>Study Control Panel</span>
-      <span class="closeBtn" onclick="closeApp('study')">✖</span>
-    </div>
-    <div class="content">
-      <div class="big">NOW LET ME STUDY.</div>
-      <div id="examName">Loading...</div>
-      <div class="timer" id="timer"></div>
-      <div id="alert"></div>
-      <div class="bar"><div class="fill" id="fill"></div></div>
-      <div class="badge">FOCUS MODE ACTIVE</div>
-    </div>
-  </div>
-
-  <div class="window" id="youtubeWin">
-    <div class="titleBar">
-      <span>YouTube</span>
-      <span class="closeBtn" onclick="closeApp('youtube')">✖</span>
-    </div>
-    <div class="content">
-      <iframe class="appFrame" src="https://www.youtube.com/embed/dQw4w9WgXcQ"></iframe>
-    </div>
-  </div>
-
-  <div class="window" id="discordWin">
-    <div class="titleBar">
-      <span>Discord</span>
-      <span class="closeBtn" onclick="closeApp('discord')">✖</span>
-    </div>
-    <div class="content">
-      <div class="big">Discord is currently blocked.</div>
-      <div class="badge">STUDY OS FIREWALL</div>
-    </div>
-  </div>
-
-  <div class="taskbar">
-    <div class="startBtn" onclick="toggleStart()"></div>
-
-    <div class="taskIcons">
-      <img class="taskIcon" src="assets/study.png" onclick="openApp('study')">
-      <img class="taskIcon" src="assets/youtube.png" onclick="openApp('youtube')">
-      <img class="taskIcon" src="assets/discord.png" onclick="openApp('discord')">
-    </div>
-
-    <div class="clock" id="clock"></div>
-  </div>
-
-  <div class="startMenu" id="startMenu">
-    <div class="menuItem" onclick="openApp('study')">📊 Study Panel</div>
-    <div class="menuItem" onclick="openApp('youtube')">▶ YouTube</div>
-    <div class="menuItem" onclick="openApp('discord')">💬 Discord</div>
-  </div>
-
+<div class="taskbar">
+<div class="icon" onclick="openWin('study')">📚</div>
+<div class="icon" onclick="openWin('youtube')">▶️</div>
+<div class="icon" onclick="openWin('discord')">💬</div>
+</div>
 </div>
 
 <script>
+setTimeout(() => {
+  document.getElementById("boot").style.display = "none";
+  document.getElementById("login").style.display = "flex";
+}, 3000);
 
-let boot = 0;
-setInterval(() => {
-  boot += 2;
-  document.getElementById("bootFill").style.width = boot + "%";
-  if(boot >= 100){
-    document.getElementById("boot").style.display = "none";
-    document.getElementById("desktop").style.display = "block";
-  }
-}, 25);
+function doLogin(){
+ if(pw.value==='1234'){login.style.display='none';desktop.style.display='block'}
+ else{error.textContent='Incorrect password';pw.value=''}
+}
 
-const exams = [
-  {name:"Exam 1", time:new Date("2026-06-16T11:30:00")},
-  {name:"Exam 2", time:new Date("2026-06-17T08:15:00")},
-  {name:"Exam 3", time:new Date("2026-06-19T08:15:00")}
+function openWin(id){document.getElementById(id).style.display='block'}
+function closeWin(id){document.getElementById(id).style.display='none'}
+
+const exams=[
+{name:'Exam 1',time:new Date('2026-06-16T11:30:00')},
+{name:'Exam 2',time:new Date('2026-06-17T08:15:00')},
+{name:'Exam 3',time:new Date('2026-06-19T08:15:00')}
 ];
 
-function nextExam(){
-  return exams.find(e => e.time > new Date()) || null;
-}
-
-function format(ms){
-  let s = Math.max(0, ms/1000);
-  let d = Math.floor(s/86400); s%=86400;
-  let h = Math.floor(s/3600); s%=3600;
-  let m = Math.floor(s/60);
-  let sec = Math.floor(s%60);
-  return `${d}d ${h}h ${m}m ${sec}s`;
-}
-
 function update(){
-  const exam = nextExam();
-  const now = new Date();
-
-  if(exam){
-    const diff = exam.time - now;
-    document.getElementById("examName").innerText = exam.name + " → NEXT";
-    document.getElementById("timer").innerText = format(diff);
-
-    let alert = "";
-    if(diff < 3600000) alert = "<div class='danger'>CRITICAL</div>";
-    else if(diff < 86400000) alert = "<div class='warn'>WARNING</div>";
-    document.getElementById("alert").innerHTML = alert;
-
-    let total = 1000*60*60*24*10;
-    let prog = Math.max(0, Math.min(100, 100 - (diff/total)*100));
-    document.getElementById("fill").style.width = prog + "%";
-  }
-
-  document.getElementById("clock").innerText = new Date().toLocaleTimeString();
+ let ex=exams.find(e=>e.time>new Date());
+ if(!ex){exam.textContent='All exams completed';count.textContent='🎉';return;}
+ let d=ex.time-new Date();
+ let s=Math.floor(d/1000),days=Math.floor(s/86400);s%=86400;
+ let h=Math.floor(s/3600);s%=3600;
+ let m=Math.floor(s/60);let sec=s%60;
+ exam.textContent=ex.name+' - Next Exam';
+ count.textContent=`${days}d ${h}h ${m}m ${sec}s`;
 }
-
-function openApp(app){
-  document.getElementById(app+"Win").style.display = "block";
-}
-
-function closeApp(app){
-  document.getElementById(app+"Win").style.display = "none";
-}
-
-function toggleStart(){
-  const m = document.getElementById("startMenu");
-  m.style.display = m.style.display === "block" ? "none" : "block";
-}
-
-setInterval(update,1000);
-update();
-
+setInterval(update,1000);update();
 </script>
-
 </body>
 </html>
